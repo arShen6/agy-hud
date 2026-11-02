@@ -1,0 +1,14 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "arshen-agy-hud",
+  "displayName": "AGY HUD by arShen6",
+  "version": "0.1.0",
+  "description": "A compact CLI HUD showing native model quotas, reset countdowns, context usage, Git branch and agent activity. No API keys or polling.",
+  "logo": "assets/logo.svg",
+  "author": { "name": "arShen6", "url": "https://github.com/arShen6" },
+  "homepage": "https://github.com/arShen6/agy-hud",
+  "repository": "https://github.com/arShen6/agy-hud",
+  "license": "MIT",
+  "keywords": ["hud", "statusline", "quota", "cli"],
+  "suggestedPrompts": ["Set up AGY HUD in my CLI", "Preview AGY HUD and switch its language to Chinese", "Diagnose or uninstall AGY HUD"]
+}
