@@ -1,5 +1,7 @@
 # Publishing
 
+Status (2026-11-02): version 0.1.1 submitted through the official Marketplace interest form. The form confirmed the response was recorded. Review is pending; this is not an approval or a live listing.
+
 Repository: https://github.com/arShen6/agy-hud
 
 Plugin identifier: `arshen-agy-hud`. Display name: `AGY HUD by arShen6`.
