@@ -7,10 +7,10 @@ disable-model-invocation: true
 Resolve the plugin root from this skill's location: two directories above this file.
 Run Node.js 20 or newer with `<plugin-root>/scripts/agy-hud.mjs` and the requested command:
 
-- `preview [--zh]`: show a clearly labeled demonstration with synthetic quotas.
-- `setup [--zh]`: back up settings and wire the HUD into agy's native statusLine; use `--zh` for Chinese users.
+- `preview`: show a clearly labeled demonstration with synthetic quotas.
+- `setup`: back up settings and wire the HUD into agy's native statusLine.
 - `doctor`: check paths and current wiring without printing credentials or the full settings file.
-- `configure zh` or `configure en`: change the language.
+- `configure en`: reset legacy language settings to English. The HUD UI is English-only; Chinese documentation is available in `README.zh-CN.md`.
 - `uninstall`: restore the previous statusLine without reverting unrelated settings.
 
 When the user requests installation or setup, run `setup` followed by `doctor`. Tell the user to restart agy once. Do not invoke a model to calculate quota; agy pipes the native quota object to the renderer. Missing fields mean unavailable, never zero. The standard footer remains stacked above the HUD, retaining native controls and credit indicators. Quota bars show REMAINING quota; the context bar shows USED context.

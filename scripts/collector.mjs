@@ -10,7 +10,7 @@ export function readJSON(path, fallback) {
 }
 export function readConfig() {
   const c = readJSON(join(dataDir(), 'config.json'), {});
-  return { language: c.language === 'zh' ? 'zh' : 'en', color: c.color !== false && !('NO_COLOR' in process.env),
+  return { color: c.color !== false && !('NO_COLOR' in process.env),
     showAgents: c.showAgents !== false, showDisabled: c.showDisabled !== false, git: c.git !== false };
 }
 export function collectGit(payload, config) {

@@ -15,8 +15,8 @@ function fixture(fn) {
 test('setup, repeat setup, restart wiring, uninstall preserve unrelated preferences', () => fixture(({ settings, run, read, dir }) => {
   const before = { statusLine: { command: 'old', padding: 1 }, model: 'unchanged', permissions: { allow: ['user rule'] }, useG1Credits: false };
   writeFileSync(settings, JSON.stringify(before));
-  assert.equal(run('setup', '--zh').status, 0);
-  assert.equal(run('setup', '--zh').status, 0);
+  assert.equal(run('setup').status, 0);
+  assert.equal(run('setup').status, 0);
   assert.equal(JSON.parse(run('doctor').stdout).installed, true);
   const current = read(); assert.deepEqual(current.permissions, before.permissions); assert.equal(current.useG1Credits, false);
   assert.equal(current.statusLine.stack_with_default, true);

@@ -12,18 +12,17 @@ try {
     try { config = readConfig(); } catch { config = { color: false }; }
     console.log(hud(payload, config, collectGit(payload, config)));
   } else if (command === 'setup') {
-    const language = process.argv.includes('--zh') ? 'zh' : undefined;
-    console.log(`AGY HUD installed: ${install(entry, language)}\nRestart agy once. Run /agy-hud for help.`);
+    console.log(`AGY HUD installed: ${install(entry)}\nRestart agy once. Run /agy-hud for help.`);
   } else if (command === 'uninstall') {
     uninstall(); console.log('Previous status line restored. Restart agy.');
   } else if (command === 'doctor') {
     console.log(JSON.stringify(doctor(entry), null, 2));
   } else if (command === 'configure') {
     const language = process.argv[3];
-    if (!['zh', 'en'].includes(language)) throw new Error('Use: configure zh | en');
+    if (language !== 'en') throw new Error('The HUD uses English. Use: configure en');
     configure({ language }); console.log(`Language: ${language}`);
   } else if (command === 'preview') {
-    console.log('DEMO / 示例数据 — not your live quota\n');
+    console.log('DEMO — not your live quota\n');
     console.log(hud({ model: { display_name: 'Gemini 4 Argon', effort: 'high' }, cwd: '/demo/agy-hud',
       context_window: { used_percentage: 24 }, vcs: { branch: 'main', dirty: false }, plan_tier: 'Google AI Pro',
       terminal_width: 100, agent_state: 'working', quota: {
@@ -32,9 +31,9 @@ try {
         '3p-5h': { remaining_fraction: 0.18, reset_in_seconds: 2400 },
         '3p-weekly': { remaining_fraction: 0.43, reset_in_seconds: 280800 },
         'gemini-argon-wtu-weekly': { remaining_fraction: 0.76, reset_in_seconds: 190800 },
-      }, subagents: [{ name: 'review', status: 'running' }], task_count: 1 }, { ...readConfig(), ...(process.argv.includes('--zh') ? { language: 'zh' } : {}) }));
-  } else if (command === 'version') console.log('0.1.0');
-  else throw new Error('Commands: setup [--zh], render, preview [--zh], doctor, configure zh|en, uninstall, version');
+      }, subagents: [{ name: 'review', status: 'running' }], task_count: 1 }, readConfig()));
+  } else if (command === 'version') console.log('0.1.1');
+  else throw new Error('Commands: setup, render, preview, doctor, configure en, uninstall, version');
 } catch (e) {
   if (command === 'render') { console.log('AGY HUD: data unavailable'); process.exit(0); }
   console.error(`AGY HUD: ${e.message}`); process.exitCode = 1;

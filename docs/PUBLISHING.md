@@ -12,6 +12,6 @@ Plugin identifier: `arshen-agy-hud`. Display name: `AGY HUD by arShen6`.
 
 Suggested submission description:
 
-AGY HUD is a native, zero-dependency Antigravity CLI status-line plugin inspired by Claude HUD. It displays per-model remaining quota, reset countdowns, context usage, current model, Git branch and subagent activity. It supports English/Chinese and narrow terminals, uses only the status payload supplied by agy, and never reads credentials or calls quota endpoints. Setup backs up settings; uninstall restores the previous status line.
+AGY HUD is a native, zero-dependency Antigravity CLI status-line plugin inspired by Claude HUD. It displays per-model remaining quota, reset countdowns, context usage, current model, Git branch and subagent activity. It has an English UI, Chinese documentation, and support for narrow terminals, uses only the status payload supplied by agy, and never reads credentials or calls quota endpoints. Setup backs up settings; uninstall restores the previous status line.
 
 Capabilities: one explicitly invoked `agy-hud` skill plus local Node.js scripts. No MCP servers, auth, hooks, always-on rules or paid service. Local Node.js 20+ required.

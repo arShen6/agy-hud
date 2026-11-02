@@ -24,7 +24,7 @@ function settings() {
   if (!s || typeof s !== 'object' || Array.isArray(s)) throw new Error('settings.json must be an object');
   return s;
 }
-export function install(entry, language) {
+export function install(entry) {
   const file = settingsFile(), current = settings(), command = commandFor(entry);
   const stateFile = join(dataDir(), 'installation.json');
   const old = readJSON(stateFile, null);
@@ -40,7 +40,7 @@ export function install(entry, language) {
   atomic(stateFile, state);
   current.statusLine = { type: 'command', command, enabled: true, padding: 0, stack_with_default: true };
   atomic(file, current);
-  if (language) configure({ language });
+  configure({ language: 'en' });
   return file;
 }
 export function configure(update) {

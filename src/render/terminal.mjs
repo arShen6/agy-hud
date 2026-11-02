@@ -39,10 +39,10 @@ export function bar(value, remaining, enabled) {
   const danger = remaining ? 100 - value : value;
   return color('█'.repeat(filled) + '░'.repeat(10 - filled), danger >= 90 ? 31 : danger >= 70 ? 33 : 32, enabled) + ` ${Math.round(value)}%`;
 }
-export function duration(seconds, zh) {
-  if (seconds === null) return zh ? '重置未知' : 'reset unknown';
-  if (seconds <= 0) return zh ? '等待刷新' : 'await refresh';
+export function duration(seconds) {
+  if (seconds === null) return 'reset unknown';
+  if (seconds <= 0) return 'await refresh';
   let minutes = Math.ceil(seconds / 60), days = Math.floor(minutes / 1440);
   const hours = Math.floor((minutes % 1440) / 60); minutes %= 60;
-  return (zh ? '重置 ' : 'reset ') + (days ? `${days}d ${hours}h` : hours ? `${hours}h ${minutes}m` : `${minutes}m`);
+  return 'reset ' + (days ? `${days}d ${hours}h` : hours ? `${hours}h ${minutes}m` : `${minutes}m`);
 }

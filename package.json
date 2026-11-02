@@ -1,10 +1,16 @@
 {
   "name": "@arshen6/agy-hud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Claude HUD-inspired native status line for Antigravity CLI",
   "type": "module",
   "private": true,
-  "engines": { "node": ">=20" },
-  "scripts": { "test": "node --test", "preview": "node scripts/agy-hud.mjs preview", "check": "node scripts/check.mjs" },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "preview": "node scripts/agy-hud.mjs preview",
+    "check": "node scripts/check.mjs"
+  },
   "license": "MIT"
 }
