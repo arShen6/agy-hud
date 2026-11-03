@@ -1,6 +1,6 @@
 {
   "name": "@arshen6/agy-hud",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Claude HUD-inspired native status line for Antigravity CLI",
   "type": "module",
   "private": true,

@@ -51,6 +51,8 @@ Agents 1 active / 0 done │ review │ Tasks 1
 
 `node scripts/agy-hud.mjs preview` prints this demo with colors. Narrow terminals use percentages and wrap lines. Quota bars mean **remaining**; context means **used**. Red means quota is low or context is nearly full. All numbers come from the CLI's native payload. Disabled and unavailable buckets are labeled explicitly. Reset countdowns refresh when agy invokes the script; the HUD does not run a background polling timer. Absolute credit balances appear if agy supplies a `remaining_amount` bucket; otherwise consult the stacked native footer or `/credits`.
 
+Windows users upgrading from 0.1.0/0.1.1 must rerun setup after updating to replace the saved launch command. See the [Windows launch fix](docs/WINDOWS-LAUNCH.md).
+
 ## Configure / remove
 
 ```sh

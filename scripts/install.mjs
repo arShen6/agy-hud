@@ -16,8 +16,9 @@ function quote(s) {
   return "'" + s.replaceAll("'", "'\\''") + "'";
 }
 export function commandFor(entry) {
-  const command = `${quote(process.execPath)} ${quote(entry)} render`;
-  return process.platform === 'win32' ? `"${command}"` : command;
+  // Store a shell command, not a quoted argument to cmd /c. The shell launcher
+  // owns that outer boundary; wrapping here would quote the command twice.
+  return `${quote(process.execPath)} ${quote(entry)} render`;
 }
 function settings() {
   const s = readJSON(settingsFile(), {});

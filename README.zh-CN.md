@@ -50,6 +50,8 @@ Agents 1 active / 0 done │ review │ Tasks 1
 
 所有额度都来自 agy 原生输入；可以用 `/usage` 对照。积分余额仅在 agy 提供相关字段时显示，也可查看原生状态栏或 `/credits`。本插件没有移植 Claude 专用的工具历史和待办解析，不能显示宿主没有提供的数据。
 
+Windows 用户从 0.1.0/0.1.1 升级后，请重新运行 setup 或 `/agy-hud` 配置，以替换旧版保存的启动命令。详见 [Windows 启动问题修复记录](docs/WINDOWS-LAUNCH.md)。
+
 ## 配置、升级与卸载
 
 配置文件：`~/.config/agy-hud/config.json`。
