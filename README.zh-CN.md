@@ -52,6 +52,8 @@ Agents 1 active / 0 done │ review │ Tasks 1
 
 Windows 用户从 0.1.0/0.1.1 升级后，请重新运行 setup 或 `/agy-hud` 配置，以替换旧版保存的启动命令。详见 [Windows 启动问题修复记录](docs/WINDOWS-LAUNCH.md)。
 
+额度百分比保留一位小数，避免较小变化被整数取整掩盖。但“状态栏重画”不代表“重新查询了额度”：实测 agy 会在结束对话时跳过被节流的额度查询。可用官方 `/usage` 对照，详见 [刷新调查与 claude-hud 对比](docs/QUOTA-REFRESH.md)。当前版本没有实现每轮结束强制查额；本地自动查询原型会增加约 7 秒收尾等待，尚未发布。
+
 ## 配置、升级与卸载
 
 配置文件：`~/.config/agy-hud/config.json`。

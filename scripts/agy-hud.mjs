@@ -32,7 +32,7 @@ try {
         '3p-weekly': { remaining_fraction: 0.43, reset_in_seconds: 280800 },
         'gemini-argon-wtu-weekly': { remaining_fraction: 0.76, reset_in_seconds: 190800 },
       }, subagents: [{ name: 'review', status: 'running' }], task_count: 1 }, readConfig()));
-  } else if (command === 'version') console.log('0.1.2');
+  } else if (command === 'version') console.log('0.1.3');
   else throw new Error('Commands: setup, render, preview, doctor, configure en, uninstall, version');
 } catch (e) {
   if (command === 'render') { console.log('AGY HUD: data unavailable'); process.exit(0); }

@@ -12,6 +12,23 @@ test('quota shows remaining while context shows used', () => {
   assert.match(text, /Gemini 5h left ███████░░░ 70%/);
   assert.match(text, /reset 1h 0m/);
 });
+test('small quota changes remain visible in wide and narrow terminals', () => {
+  for (const terminal_width of [40, 100]) {
+    const before = hud({ terminal_width, quota: { 'gemini-5h': { remaining_fraction: .8249 } } }, plain);
+    const after = hud({ terminal_width, quota: { 'gemini-5h': { remaining_fraction: .8151 } } }, plain);
+    assert.match(before, /82\.5%/);
+    assert.match(after, /81\.5%/);
+    assert.notEqual(before, after);
+  }
+});
+test('quota rounding never labels a nonempty bucket empty or a partly used bucket full', () => {
+  for (const terminal_width of [40, 100]) {
+    for (const [remaining_fraction, expected] of [[0, '0%'], [.0001, '<0.1%'], [.9999, '>99.9%'], [1, '100%']]) {
+      const text = hud({ terminal_width, quota: { 'gemini-5h': { remaining_fraction } } }, plain);
+      assert.ok(text.includes(` ${expected}`), text);
+    }
+  }
+});
 test('unknown and zero are distinct; amount is not a percentage', () => {
   const s = normalize({ quota: { unknown: {}, empty: { remaining_fraction: 0 }, credits: { remaining_amount: 120 } } });
   assert.equal(s.quota[0].remaining, null); assert.equal(s.quota[1].remaining, 0);

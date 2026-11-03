@@ -1,6 +1,6 @@
 {
   "name": "@arshen6/agy-hud",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Claude HUD-inspired native status line for Antigravity CLI",
   "type": "module",
   "private": true,
@@ -8,7 +8,7 @@
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test",
+    "test": "node --test tests",
     "preview": "node scripts/agy-hud.mjs preview",
     "check": "node scripts/check.mjs"
   },

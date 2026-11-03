@@ -1,4 +1,4 @@
-import { bar, color, duration, pack, fit } from './terminal.mjs';
+import { bar, color, duration, pack, fit, quotaPercent } from './terminal.mjs';
 export function render(s, config = {}) {
   const enabled = config.color !== false;
   const width = s.width, lines = [];
@@ -15,7 +15,7 @@ export function render(s, config = {}) {
       if (config.showDisabled !== false) lines.push(color(`${label} · disabled`, 90, enabled));
       continue;
     }
-    const value = q.remaining !== null ? (width >= 65 ? bar(q.remaining, true, enabled) : Math.round(q.remaining) + '%')
+    const value = q.remaining !== null ? (width >= 65 ? bar(q.remaining, true, enabled) : quotaPercent(q.remaining))
       : q.amount !== null ? String(q.amount) : '--';
     const segments = [`${label} left ${value}`, duration(q.seconds)];
     lines.push(...pack(segments, width));

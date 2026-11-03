@@ -53,6 +53,8 @@ Agents 1 active / 0 done │ review │ Tasks 1
 
 Windows users upgrading from 0.1.0/0.1.1 must rerun setup after updating to replace the saved launch command. See the [Windows launch fix](docs/WINDOWS-LAUNCH.md).
 
+Quota percentages retain one decimal place so small changes remain visible. A status-line redraw does not guarantee new quota data: agy can throttle its own quota refresh. Use `/usage` to check, and read the [refresh findings and Claude HUD comparison](docs/QUOTA-REFRESH.md). This HUD does not claim to force a fresh balance after every message.
+
 ## Configure / remove
 
 ```sh
