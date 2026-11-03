@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, cpSync, copyFileSync, mkdirSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, cpSync, copyFileSync, mkdirSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -42,7 +42,17 @@ test('installed command launches real Node and HUD from paths with spaces and sh
   const node = join(runtimeDir, process.platform === 'win32' ? 'node.exe' : 'node');
   copyFileSync(process.execPath, node);
   const installedEntry = join(pluginRoot, 'scripts', 'agy-hud.mjs');
-  assertSuccess('setup in spaced paths', spawnSync(node, [installedEntry, 'setup'], { env, encoding: 'utf8', timeout: 5000 }));
+  const setup = spawnSync(node, [installedEntry, 'setup'], { env, encoding: 'utf8', timeout: 5000 });
+  if (setup.status !== 0) {
+    console.log('Copied entry diagnostics:', JSON.stringify({ installedEntry, exists: existsSync(installedEntry), files: readdirSync(join(pluginRoot, 'scripts')), realpath: realpathSync(installedEntry), node, originalNode: process.execPath }));
+    for (const runtime of [process.execPath, node]) {
+      for (const script of [installedEntry, realpathSync(installedEntry), './scripts/agy-hud.mjs']) {
+        const result = spawnSync(runtime, [script, 'version'], { cwd: pluginRoot, env, encoding: 'utf8', timeout: 5000 });
+        console.log('Path resolution diagnostic:', details([runtime, script], result));
+      }
+    }
+  }
+  assertSuccess('setup in spaced paths', setup);
   const command = read().statusLine.command;
   const options = { input: '{"model":{"display_name":"Launch Regression"},"quota":{"gemini-5h":{"remaining_fraction":0.7}}}', env, encoding: 'utf8', timeout: 5000 };
   const render = assertSuccess(command, spawnSync(command, { ...options, shell: true }));
