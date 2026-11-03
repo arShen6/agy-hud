@@ -21,7 +21,13 @@ test('setup, repeat setup, restart wiring, uninstall preserve unrelated preferen
   const current = read(); assert.deepEqual(current.permissions, before.permissions); assert.equal(current.useG1Credits, false);
   assert.equal(current.statusLine.stack_with_default, true);
   const render = spawnSync(current.statusLine.command, { shell: true, input: '{}', encoding: 'utf8', timeout: 5000, env: { ...process.env, NO_COLOR: '1' } });
-  assert.equal(render.status, 0); assert.match(render.stdout, /AGY/);
+  const details = (command, result) => JSON.stringify({ command, status: result.status, signal: result.signal, error: result.error?.message, stdout: result.stdout, stderr: result.stderr }, null, 2);
+  if (process.platform === 'win32' && render.status !== 0) {
+    const candidate = current.statusLine.command.slice(1, -1);
+    const comparison = spawnSync(candidate, { shell: true, input: '{}', encoding: 'utf8', timeout: 5000, env: { ...process.env, NO_COLOR: '1' } });
+    console.log('Diagnostic only: same command without outer quotes:', details(candidate, comparison));
+  }
+  assert.equal(render.status, 0, details(current.statusLine.command, render)); assert.match(render.stdout, /AGY/);
   current.model = 'changed later'; writeFileSync(settings, JSON.stringify(current));
   assert.equal(run('uninstall').status, 0);
   assert.deepEqual(read(), { ...before, model: 'changed later' });
