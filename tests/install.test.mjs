@@ -36,7 +36,12 @@ test('installed command launches real Node and HUD from paths with spaces and sh
   // Both executable and plugin paths must contain spaces. Previously only the
   // settings path did, so the launch test missed this common Windows case.
   const pluginRoot = join(dir, "plugin & tools (HUD) ' 中文");
-  for (const folder of ['src', 'scripts']) cpSync(resolve(folder), join(pluginRoot, folder), { recursive: true });
+  for (const folder of ['src', 'scripts']) {
+    cpSync(resolve(folder), join(pluginRoot, folder), { recursive: true });
+    if (!existsSync(join(pluginRoot, folder))) {
+      console.log('Copy diagnostic:', JSON.stringify({ folder, destination: join(pluginRoot, folder), parentEntries: readdirSync(dir), parentTree: readdirSync(dir, { recursive: true }) }));
+    }
+  }
   const runtimeDir = join(dir, 'runtime & tools (Node)');
   mkdirSync(runtimeDir);
   const node = join(runtimeDir, process.platform === 'win32' ? 'node.exe' : 'node');
@@ -44,12 +49,15 @@ test('installed command launches real Node and HUD from paths with spaces and sh
   const installedEntry = join(pluginRoot, 'scripts', 'agy-hud.mjs');
   const setup = spawnSync(node, [installedEntry, 'setup'], { env, encoding: 'utf8', timeout: 5000 });
   if (setup.status !== 0) {
-    console.log('Copied entry diagnostics:', JSON.stringify({ installedEntry, exists: existsSync(installedEntry), files: readdirSync(join(pluginRoot, 'scripts')), realpath: realpathSync(installedEntry), node, originalNode: process.execPath }));
+    console.log('Setup diagnostic:', details([node, installedEntry, 'setup'], setup));
+    console.log('Copied entry diagnostics:', JSON.stringify({ installedEntry, exists: existsSync(installedEntry), parentTree: readdirSync(dir, { recursive: true }), node, originalNode: process.execPath }));
+    if (existsSync(installedEntry)) {
     for (const runtime of [process.execPath, node]) {
       for (const script of [installedEntry, realpathSync(installedEntry), './scripts/agy-hud.mjs']) {
         const result = spawnSync(runtime, [script, 'version'], { cwd: pluginRoot, env, encoding: 'utf8', timeout: 5000 });
         console.log('Path resolution diagnostic:', details([runtime, script], result));
       }
+    }
     }
   }
   assertSuccess('setup in spaced paths', setup);
