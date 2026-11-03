@@ -2,8 +2,8 @@
   "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "arshen-agy-hud",
   "displayName": "AGY HUD by arShen6",
-  "version": "0.1.3",
-  "description": "A compact CLI HUD showing native model quotas, reset countdowns, context usage, Git branch and agent activity. No API keys or polling.",
+  "version": "0.2.0",
+  "description": "A compact CLI HUD with turn-end quota queries via official /usage, reset countdowns, context, Git and agent activity. Queries add a short wait; native-only mode is available.",
   "logo": "assets/logo.svg",
   "author": {
     "name": "arShen6",

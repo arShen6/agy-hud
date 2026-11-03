@@ -62,6 +62,11 @@ test('installed command launches real Node and HUD from paths with spaces and sh
   const render = assertSuccess(command, spawnSync(command, { ...options, shell: true }));
   assert.match(render.stdout, /Launch Regression/);
   assert.match(render.stdout, /Gemini 5h left .*70%/);
+  const hookCommand = JSON.parse(readFileSync(resolve('hooks.json'), 'utf8'))['agy-hud-quota-refresh'].Stop[0].command;
+  const hook = assertSuccess(hookCommand, spawnSync(hookCommand, {
+    ...options, cwd: pluginRoot, shell: true, input: '{}', env: { ...env, AGY_HUD_REFRESH_CHILD: '1' },
+  }));
+  assert.deepEqual(JSON.parse(hook.stdout), {});
   if (process.platform === 'win32') {
     // Also execute the persisted command as a native cmd statement, without
     // Node's shell:true quoting around that statement.

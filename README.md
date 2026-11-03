@@ -1,6 +1,8 @@
 # AGY HUD
 
-A compact, Claude HUD-inspired status line for **Google Antigravity CLI (`agy`)**. Native quota bars, reset countdowns, context, model, Git branch and agent activity. English interface, with [中文文档](README.zh-CN.md). Zero npm dependencies, API keys, polling or telemetry.
+A compact, Claude HUD-inspired status line for **Google Antigravity CLI (`agy`)**. Quota bars, reset countdowns, context, model, Git branch and agent activity. English interface, with [中文文档](README.zh-CN.md). Zero npm dependencies, extra API keys, background polling or telemetry.
+
+**Version 0.2 queries official `/usage` after each turn by default.** This added 7–10 seconds to turn completion in local checks; each query is limited to 20 seconds. The HUD shows when a query completed, or whether it failed. Choose native-only mode below if you prefer no extra wait.
 
 This is `arShen6/agy-hud`, installed as **`arshen-agy-hud`** to avoid colliding with other plugins named agy-hud. Independent community project; not affiliated with Google, Anthropic or the Claude HUD maintainers.
 
@@ -49,16 +51,18 @@ Argon 7d left ████████░░ 76% │ reset 2d 5h
 Agents 1 active / 0 done │ review │ Tasks 1
 ```
 
-`node scripts/agy-hud.mjs preview` prints this demo with colors. Narrow terminals use percentages and wrap lines. Quota bars mean **remaining**; context means **used**. Red means quota is low or context is nearly full. All numbers come from the CLI's native payload. Disabled and unavailable buckets are labeled explicitly. Reset countdowns refresh when agy invokes the script; the HUD does not run a background polling timer. Absolute credit balances appear if agy supplies a `remaining_amount` bucket; otherwise consult the stacked native footer or `/credits`.
+`node scripts/agy-hud.mjs preview` prints this demo with colors. Narrow terminals use percentages and wrap lines. Quota bars mean **remaining**; context means **used**. Red means quota is low or context is nearly full. Numbers come from agy's native payload or a validated official `/usage` result. Disabled and unavailable buckets are labeled explicitly. Reset countdowns refresh when agy invokes the script; the HUD does not run a background polling timer. Absolute credit balances appear if agy supplies a `remaining_amount` bucket; otherwise consult the stacked native footer or `/credits`.
 
 Windows users upgrading from 0.1.0/0.1.1 must rerun setup after updating to replace the saved launch command. See the [Windows launch fix](docs/WINDOWS-LAUNCH.md).
 
-Quota percentages retain one decimal place so small changes remain visible. A status-line redraw does not guarantee new quota data: agy can throttle its own quota refresh. Use `/usage` to check, and read the [refresh findings and Claude HUD comparison](docs/QUOTA-REFRESH.md). This HUD does not claim to force a fresh balance after every message.
+Quota percentages retain one decimal place so small changes remain visible. The plugin's `Stop` hook queries `/usage`, then the next host redraw reads its snapshot. `Quota: /usage checked 0s ago` confirms a successful command result, even when the balance is unchanged. Failed or timed-out queries fall back to native data with a visible label. Native changes invalidate the snapshot; snapshots expire after five minutes. Query time is not a guarantee of upstream billing freshness. Read the [refresh behavior and evidence](docs/QUOTA-REFRESH.md).
 
 ## Configure / remove
 
 ```sh
 node scripts/agy-hud.mjs configure en   # reset a legacy language setting
+node scripts/agy-hud.mjs configure quota-refresh native   # no turn-end query
+node scripts/agy-hud.mjs configure quota-refresh turn-end # enable it again
 node scripts/agy-hud.mjs doctor
 node scripts/agy-hud.mjs uninstall     # restore previous statusLine first
 agy plugin uninstall arshen-agy-hud
@@ -67,16 +71,16 @@ agy plugin uninstall arshen-agy-hud
 Run these from the installed plugin directory, or use absolute paths. User configuration lives at `~/.config/agy-hud/config.json`:
 
 ```json
-{ "color": true, "showAgents": true, "showDisabled": true, "git": true }
+{ "color": true, "showAgents": true, "showDisabled": true, "git": true, "quotaRefresh": "turn-end" }
 ```
 
-The HUD interface always uses English; legacy `language: "zh"` settings are ignored. User-provided project, branch and model names retain their original text. `NO_COLOR` disables ANSI colors. `AGY_HUD_HOME` changes the HUD configuration directory; `AGY_HUD_SETTINGS` changes the agy settings path (useful for tests). The installer records an absolute Node path: rerun setup if Node is removed or moved. Stop agy before setup or uninstall to avoid simultaneous settings writes. Disabling a plugin alone does not remove its configured statusLine.
+The HUD interface always uses English; legacy `language: "zh"` settings are ignored. User-provided project, branch and model names retain their original text. `NO_COLOR` disables ANSI colors. `AGY_HUD_HOME` changes the HUD configuration directory; `AGY_HUD_SETTINGS` changes the agy settings path (useful for tests). `AGY_HUD_AGY` can name an absolute agy executable path when it is not on `PATH`; it is an executable, not a shell command. The Stop hook requires `node` on `PATH`. The installer records an absolute Node path for rendering: rerun setup if Node is removed or moved. Stop agy before setup or uninstall to avoid simultaneous settings writes. Disabling a plugin alone does not remove its configured statusLine.
 
-To upgrade, repeat the install command, then `/agy-hud` setup. Doctor verifies the installed path. Missing quotas: first compare agy's `/usage`; this HUD cannot invent fields the host did not supply. No active-tool history or todo progress is claimed: those Claude-specific transcript features are not available in this native adapter.
+To upgrade, repeat the install command, then `/agy-hud` setup and restart agy to load the new hook. Doctor verifies the installed path and reports the refresh mode and hook file. Auto-refresh runs only while this HUD is configured and enabled. Missing quotas: first compare agy's `/usage`; this HUD cannot invent fields the host did not supply. No active-tool history or todo progress is claimed: those Claude-specific transcript features are not available in this native adapter.
 
 ## Privacy and development
 
-No network calls, credential files, transcript reads, payload logging or account caches. Email and conversation IDs are discarded. Config backups remain local and are not part of the repository. Git metadata is queried with a short timeout; turn off `git` to disable the probe. Read [ARCHITECTURE.md](ARCHITECTURE.md) for responsibilities and limits.
+The HUD does not read credentials or transcripts, log prompts/raw payloads, or call a service API directly. Automatic refresh starts the signed-in agy executable with the fixed `/usage` command; agy handles its own authentication and networking. Validated quota fields, query timestamps and native-data fingerprints are stored privately under `~/.config/agy-hud/quota/`. Conversation IDs are hashed into filenames; account labels are included only in a fingerprint to invalidate snapshots on account changes. Snapshots are isolated per conversation and ignored after five minutes; files remain until removed locally. Restart existing sessions after switching the CLI's signed-in account. Config backups remain local and are not part of the repository. Git metadata is queried with a short timeout; turn off `git` to disable the probe. Read [ARCHITECTURE.md](ARCHITECTURE.md) for responsibilities and limits.
 
 ```sh
 npm test

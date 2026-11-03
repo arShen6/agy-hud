@@ -11,7 +11,8 @@ export function readJSON(path, fallback) {
 export function readConfig() {
   const c = readJSON(join(dataDir(), 'config.json'), {});
   return { color: c.color !== false && !('NO_COLOR' in process.env),
-    showAgents: c.showAgents !== false, showDisabled: c.showDisabled !== false, git: c.git !== false };
+    showAgents: c.showAgents !== false, showDisabled: c.showDisabled !== false, git: c.git !== false,
+    quotaRefresh: c.quotaRefresh === 'native' ? 'native' : 'turn-end' };
 }
 export function collectGit(payload, config) {
   if (!config.git || payload?.vcs?.branch || payload?.vcs?.type !== 'git') return {};

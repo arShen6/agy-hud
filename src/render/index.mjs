@@ -20,6 +20,7 @@ export function render(s, config = {}) {
     const segments = [`${label} left ${value}`, duration(q.seconds)];
     lines.push(...pack(segments, width));
   }
+  if (s.quotaStatus) lines.push(...pack(s.quotaStatus.split(' · '), width));
   if (config.showAgents !== false) {
     const running = s.agents.filter(a => a.status === 'running');
     const done = s.agents.filter(a => a.status === 'completed').length;

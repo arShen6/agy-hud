@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { hud } from '../src/main.mjs';
 import { collectGit, readConfig, readInput } from './collector.mjs';
 import { install, uninstall, configure, doctor } from './install.mjs';
+import { collectQuota } from './quota-cache.mjs';
 const entry = fileURLToPath(import.meta.url), command = process.argv[2] || 'render';
 try {
   if (command === 'render') {
@@ -10,17 +11,21 @@ try {
     const payload = await readInput(); clearTimeout(timer);
     let config;
     try { config = readConfig(); } catch { config = { color: false }; }
-    console.log(hud(payload, config, collectGit(payload, config)));
+    console.log(hud(payload, config, { ...collectGit(payload, config), quotaRefresh: collectQuota(payload, config) }));
   } else if (command === 'setup') {
-    console.log(`AGY HUD installed: ${install(entry)}\nRestart agy once. Run /agy-hud for help.`);
+    console.log(`AGY HUD installed: ${install(entry)}\nRestart agy once to load the Stop hook. Turn-end quota queries may add 7-10 seconds. Run /agy-hud for help.`);
   } else if (command === 'uninstall') {
     uninstall(); console.log('Previous status line restored. Restart agy.');
   } else if (command === 'doctor') {
     console.log(JSON.stringify(doctor(entry), null, 2));
   } else if (command === 'configure') {
-    const language = process.argv[3];
-    if (language !== 'en') throw new Error('The HUD uses English. Use: configure en');
-    configure({ language }); console.log(`Language: ${language}`);
+    const option = process.argv[3], value = process.argv[4];
+    if (option === 'quota-refresh' && ['turn-end', 'native'].includes(value)) {
+      configure({ quotaRefresh: value }); console.log(`Quota refresh: ${value}`);
+    } else {
+      if (option !== 'en') throw new Error('Use: configure en | configure quota-refresh turn-end|native');
+      configure({ language: 'en' }); console.log('Language: en');
+    }
   } else if (command === 'preview') {
     console.log('DEMO — not your live quota\n');
     console.log(hud({ model: { display_name: 'Gemini 4 Argon', effort: 'high' }, cwd: '/demo/agy-hud',
@@ -32,8 +37,8 @@ try {
         '3p-weekly': { remaining_fraction: 0.43, reset_in_seconds: 280800 },
         'gemini-argon-wtu-weekly': { remaining_fraction: 0.76, reset_in_seconds: 190800 },
       }, subagents: [{ name: 'review', status: 'running' }], task_count: 1 }, readConfig()));
-  } else if (command === 'version') console.log('0.1.3');
-  else throw new Error('Commands: setup, render, preview, doctor, configure en, uninstall, version');
+  } else if (command === 'version') console.log('0.2.0');
+  else throw new Error('Commands: setup, render, preview, doctor, configure en, configure quota-refresh turn-end|native, uninstall, version');
 } catch (e) {
   if (command === 'render') { console.log('AGY HUD: data unavailable'); process.exit(0); }
   console.error(`AGY HUD: ${e.message}`); process.exitCode = 1;

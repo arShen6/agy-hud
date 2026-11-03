@@ -4,7 +4,9 @@
 
 为 **Google Antigravity CLI（`agy`）**提供的紧凑状态栏，参考 [claude-hud](https://github.com/jarrodwatts/claude-hud) 的显示方式与模块划分，独立实现。
 
-**HUD 界面、安装提示和预览全部使用英文。** 本文提供中文使用说明。无需额外 API Key，无 npm 运行依赖，不轮询额度接口。
+**HUD 界面、安装提示和预览全部使用英文。** 本文提供中文使用说明。无需额外 API Key，无 npm 运行依赖，没有后台定时轮询。
+
+**0.2 版默认每轮结束调用官方 `/usage` 查询额度。** 本机实测增加约 7–10 秒收尾等待，单次查询最多 20 秒；失败时显示提示并使用宿主数据。可以切换为原生模式，取消额外等待。
 
 ## 安装
 
@@ -48,26 +50,28 @@ Agents 1 active / 0 done │ review │ Tasks 1
 
 额度过低或上下文接近用满时会使用警示颜色。窗口变窄时自动简化进度条、换行。原生状态栏保留在 HUD 上方，继续显示 agy 的积分和交互提示。
 
-所有额度都来自 agy 原生输入；可以用 `/usage` 对照。积分余额仅在 agy 提供相关字段时显示，也可查看原生状态栏或 `/credits`。本插件没有移植 Claude 专用的工具历史和待办解析，不能显示宿主没有提供的数据。
+额度来自 agy 原生输入或官方 `/usage` 查询结果；可以手动输入 `/usage` 对照。积分余额仅在 agy 提供相关字段时显示，也可查看原生状态栏或 `/credits`。本插件没有移植 Claude 专用的工具历史和待办解析，不能显示宿主没有提供的数据。
 
 Windows 用户从 0.1.0/0.1.1 升级后，请重新运行 setup 或 `/agy-hud` 配置，以替换旧版保存的启动命令。详见 [Windows 启动问题修复记录](docs/WINDOWS-LAUNCH.md)。
 
-额度百分比保留一位小数，避免较小变化被整数取整掩盖。但“状态栏重画”不代表“重新查询了额度”：实测 agy 会在结束对话时跳过被节流的额度查询。可用官方 `/usage` 对照，详见 [刷新调查与 claude-hud 对比](docs/QUOTA-REFRESH.md)。当前版本没有实现每轮结束强制查额；本地自动查询原型会增加约 7 秒收尾等待，尚未发布。
+额度百分比保留一位小数，避免较小变化被整数取整掩盖。每轮结束的 `Stop` 事件会查询额度，接下来的状态栏重画读取结果。看到 `Quota: /usage checked 0s ago` 表示查询命令已成功返回，额度没有变化也会显示。失败、超时会明确提示并回退到原生数据。宿主额度或账号变化会使旧快照失效，快照有效期为 5 分钟。查询成功不保证上游计费数据已经结算，详见 [刷新调查与 claude-hud 对比](docs/QUOTA-REFRESH.md)。
 
 ## 配置、升级与卸载
 
 配置文件：`~/.config/agy-hud/config.json`。
 
 ```json
-{ "color": true, "showAgents": true, "showDisabled": true, "git": true }
+{ "color": true, "showAgents": true, "showDisabled": true, "git": true, "quotaRefresh": "turn-end" }
 ```
 
 界面固定使用英文，旧版 `language: "zh"` 不再生效。项目名、分支名等用户原始内容会保留，不会强行翻译。`NO_COLOR` 环境变量可关闭颜色。
 
-升级时重新执行安装命令，再运行 `/agy-hud` 配置。诊断和卸载命令如下，请从实际安装目录运行：
+升级时重新执行安装命令，再运行 `/agy-hud` 配置，并重启 agy 以加载新的结束事件。诊断、切换模式和卸载命令如下，请从实际安装目录运行：
 
 ```sh
 node scripts/agy-hud.mjs doctor
+node scripts/agy-hud.mjs configure quota-refresh native
+node scripts/agy-hud.mjs configure quota-refresh turn-end
 node scripts/agy-hud.mjs uninstall
 agy plugin uninstall arshen-agy-hud
 ```
@@ -76,7 +80,9 @@ agy plugin uninstall arshen-agy-hud
 
 ## 隐私与架构
 
-不读取登录凭据或聊天记录，不保存账号额度数据，不发送网络请求。仅根据宿主传入的数据和可选的本地 Git 查询渲染。数据采集、解析、渲染、安装分别放在独立模块中，详见 [架构说明](ARCHITECTURE.md)。
+HUD 不读取登录凭据或聊天记录，不记录提示词或完整输入，不直接调用服务接口。自动查询通过已登录的 agy 执行固定 `/usage` 命令，由 agy 处理认证和网络。经过校验的额度、查询时间和原生数据指纹保存在 `~/.config/agy-hud/quota/`，会话 ID 仅用哈希文件名，账号只参与指纹计算以识别切换。快照按会话隔离，过期后不再使用；文件可在本地删除。切换 agy 登录账号后，应重启已有会话。
+
+结束事件需要 `node` 和 `agy` 在命令搜索路径中。也可以用 `AGY_HUD_AGY` 指定 agy 可执行文件的绝对路径。数据采集、额度解析、渲染、安装分别放在独立模块中，详见 [架构说明](ARCHITECTURE.md)。
 
 GitHub 版本可以直接安装。官方市场需要另外提交审核，公开仓库不代表已经在市场上架。
 

@@ -1,0 +1,7 @@
+{
+  "agy-hud-quota-refresh": {
+    "Stop": [
+      { "type": "command", "command": "node scripts/refresh-quota.mjs", "timeout": 25 }
+    ]
+  }
+}

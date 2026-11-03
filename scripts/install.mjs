@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, renameSync, unlinkSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { dataDir, settingsFile, readJSON } from './collector.mjs';
+import { dataDir, settingsFile, readJSON, readConfig } from './collector.mjs';
 function atomic(path, value) {
   mkdirSync(dirname(path), { recursive: true });
   const tmp = `${path}.${randomUUID()}.tmp`;
@@ -61,5 +61,6 @@ export function doctor(entry) {
   const current = settings(), desired = commandFor(entry);
   const wired = current.statusLine?.command === desired && current.statusLine?.enabled !== false;
   return { node: process.version, installed: wired, entryExists: existsSync(entry), settings: settingsFile(),
-    hint: wired ? 'Restart agy once. Quota is supplied by agy; use /usage if it is missing.' : 'Run: node scripts/agy-hud.mjs setup' };
+    quotaRefresh: readConfig().quotaRefresh, hookExists: existsSync(join(dirname(entry), '..', 'hooks.json')),
+    hint: wired ? 'Restart agy to load the Stop hook. Turn-end queries have a 20-second limit; /usage remains available.' : 'Run: node scripts/agy-hud.mjs setup' };
 }
