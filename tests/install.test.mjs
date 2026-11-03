@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, cpSync, copyFileSync, mkdirSync, realpathSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync, existsSync, readdirSync, copyFileSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -9,6 +9,19 @@ const details = (command, result) => JSON.stringify({ command, status: result.st
 function assertSuccess(command, result) {
   assert.equal(result.status, 0, details(command, result));
   return result;
+}
+function copyFixture(source, destination) {
+  // Node 22.23.4's native cpSync path mangles Unicode Windows destinations
+  // (nodejs/node#61950). Keep the Unicode launch case and copy with libuv APIs.
+  mkdirSync(destination, { recursive: true });
+  for (const item of readdirSync(source, { withFileTypes: true })) {
+    const from = join(source, item.name), to = join(destination, item.name);
+    if (item.isDirectory()) copyFixture(from, to);
+    else {
+      assert.ok(item.isFile(), `Unexpected fixture entry: ${from}`);
+      copyFileSync(from, to);
+    }
+  }
 }
 function fixture(fn) {
   const dir = mkdtempSync(join(tmpdir(), "agy hud ' test-"));
@@ -36,31 +49,14 @@ test('installed command launches real Node and HUD from paths with spaces and sh
   // Both executable and plugin paths must contain spaces. Previously only the
   // settings path did, so the launch test missed this common Windows case.
   const pluginRoot = join(dir, "plugin & tools (HUD) ' 中文");
-  for (const folder of ['src', 'scripts']) {
-    cpSync(resolve(folder), join(pluginRoot, folder), { recursive: true });
-    if (!existsSync(join(pluginRoot, folder))) {
-      console.log('Copy diagnostic:', JSON.stringify({ folder, destination: join(pluginRoot, folder), parentEntries: readdirSync(dir), parentTree: readdirSync(dir, { recursive: true }) }));
-    }
-  }
+  for (const folder of ['src', 'scripts']) copyFixture(resolve(folder), join(pluginRoot, folder));
   const runtimeDir = join(dir, 'runtime & tools (Node)');
   mkdirSync(runtimeDir);
   const node = join(runtimeDir, process.platform === 'win32' ? 'node.exe' : 'node');
   copyFileSync(process.execPath, node);
   const installedEntry = join(pluginRoot, 'scripts', 'agy-hud.mjs');
-  const setup = spawnSync(node, [installedEntry, 'setup'], { env, encoding: 'utf8', timeout: 5000 });
-  if (setup.status !== 0) {
-    console.log('Setup diagnostic:', details([node, installedEntry, 'setup'], setup));
-    console.log('Copied entry diagnostics:', JSON.stringify({ installedEntry, exists: existsSync(installedEntry), parentTree: readdirSync(dir, { recursive: true }), node, originalNode: process.execPath }));
-    if (existsSync(installedEntry)) {
-    for (const runtime of [process.execPath, node]) {
-      for (const script of [installedEntry, realpathSync(installedEntry), './scripts/agy-hud.mjs']) {
-        const result = spawnSync(runtime, [script, 'version'], { cwd: pluginRoot, env, encoding: 'utf8', timeout: 5000 });
-        console.log('Path resolution diagnostic:', details([runtime, script], result));
-      }
-    }
-    }
-  }
-  assertSuccess('setup in spaced paths', setup);
+  assert.ok(existsSync(installedEntry), `Missing copied entry: ${installedEntry}`);
+  assertSuccess('setup in spaced paths', spawnSync(node, [installedEntry, 'setup'], { env, encoding: 'utf8', timeout: 5000 }));
   const command = read().statusLine.command;
   const options = { input: '{"model":{"display_name":"Launch Regression"},"quota":{"gemini-5h":{"remaining_fraction":0.7}}}', env, encoding: 'utf8', timeout: 5000 };
   const render = assertSuccess(command, spawnSync(command, { ...options, shell: true }));

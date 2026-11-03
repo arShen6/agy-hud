@@ -8,6 +8,8 @@ Node's [Windows shell launcher](https://github.com/nodejs/node/blob/v22.23.4/lib
 
 Regression coverage executes the installed command rather than comparing strings: real Node and plugin files under paths with spaces, an apostrophe, ampersand, parentheses and Unicode; JSON stdin; expected HUD output; settings preservation; uninstall restoration. Windows additionally runs the command as a native cmd batch statement. CI completes all nine OS/Node jobs even when one fails. Launch failures retain stdout/stderr in their assertion messages.
 
+The new Unicode-path fixture exposed a separate Node 22.23.4 issue before HUD setup. [Directory diagnostics](https://github.com/arShen6/agy-hud/actions/runs/41561505716) showed `fs.cpSync` silently copying into a mojibake directory instead of the requested Unicode destination. This matches Node's [non-ASCII copy fix](https://github.com/nodejs/node/pull/61950). Test preparation now uses `mkdirSync` / `copyFileSync` to copy the fixture and checks that its entry exists. The Unicode launch case remains enabled on every platform and Node version; production HUD code does not use `cpSync`.
+
 To repair an existing 0.1.0/0.1.1 installation, update the plugin and rerun setup from its installed directory (or invoke `/agy-hud` and request setup). Updating files alone does not replace the saved command in agy's settings. Setup preserves the original uninstall restoration target.
 
 This validates the shell-launch regression. It is not evidence of a signed-in end-to-end agy session on Windows, nor of Claude HUD-equivalent process isolation. See [architecture scope](../ARCHITECTURE.md).
